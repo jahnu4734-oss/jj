@@ -1,31 +1,27 @@
 # India Quant Decision Engine
 
-Research-grade framework for building, testing, and operating a multi-layer Indian equity decision engine.
+A research-grade framework for an Indian-equity prediction system designed to **rank at most two opportunities or return NO TRADE**.
 
-## Core principles
+## V1 now includes
 
-- No guaranteed predictions or win-rate promises.
-- Point-in-time data only for backtests.
-- No look-ahead bias, survivorship bias, or leakage tolerated.
-- Hard vetoes can reject a trade regardless of model score.
-- The model may return **NO TRADE**.
-- Backtest -> walk-forward -> paper trading -> controlled live deployment.
-- Every prediction and every input is audit logged.
+- 36-layer rule registry derived from the strategy specification
+- 500+ feature budget across market, sector, price, volume, volatility, F&O, institutional, fundamentals, valuation, events, news, microstructure, historical analogues, and model-health families
+- Point-in-time observation contracts and future-information checks
+- Deterministic hard filters and vetoes
+- Conservative OHLC backtest resolution when stop and target occur in the same bar
+- Auditable candidate/prediction models
+- Research CLI
+- Tests for look-ahead protection, trade resolution, feature coverage, and hard-filter behavior
 
-## Initial architecture
+## Research guardrails
 
-1. Data contracts and point-in-time timestamps
-2. Universe and liquidity filters
-3. Market regime engine
-4. Sector ranking
-5. 36-layer rule engine
-6. Feature registry for 500+ features
-7. ML probability models
-8. Historical analogue engine
-9. News/adversarial analysis
-10. Risk and portfolio constraints
-11. Calibration and model-health monitoring
-12. Morning ranking and reporting
+The code does **not** invent a win probability before a calibrated model is trained. A high score is not a performance claim. Thresholds in the 36 layers are hypotheses and must be validated with walk-forward, out-of-sample testing.
+
+The system must be allowed to return **NO TRADE**. Never force a daily pick merely to satisfy a product requirement.
+
+## Architecture
+
+`data -> point-in-time validation -> feature engineering -> 36-layer filters -> specialist models -> ensemble -> historical analogues -> adversarial analysis -> uncertainty/OOD checks -> risk engine -> ranking -> 0/1/2 decisions`
 
 ## Local setup
 
@@ -34,7 +30,11 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
 pytest
-python -m quant_engine.cli --help
+python -m quant_engine.cli status
+python -m quant_engine.cli features
+python -m quant_engine.cli demo DEMO
 ```
 
-Do not connect real broker execution until the research and paper-trading gates pass.
+The data adapter layer is intentionally provider-neutral. Add licensed NSE/vendor/broker adapters only after the research schema is stable.
+
+**Live order execution is disabled.** Move through historical validation, walk-forward testing, paper trading, and only then consider controlled execution with the applicable Indian regulatory and broker requirements.
